@@ -9,6 +9,12 @@ let package = Package(
             name: "Folio",
             path: "Sources/Folio",
             swiftSettings: [.swiftLanguageMode(.v5)]
-        )
+        ),
+        .testTarget(
+            name: "FolioTests",
+            dependencies: ["Folio"],
+            path: "Tests/FolioTests",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
     ]
 )

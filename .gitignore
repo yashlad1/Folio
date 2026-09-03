@@ -5,3 +5,5 @@ build/
 .DS_Store
 Resources/AppIcon.icns
 Resources/AppIcon.iconset/
+.swiftpm/
+__pycache__/

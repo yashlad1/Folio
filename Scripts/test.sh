@@ -2,12 +2,11 @@
 #
 # Runs Folio's test suite.
 #
-# The Command Line Tools ship neither XCTest nor swift-testing, so `swift test`
-# is unavailable. The suite is instead an executable compiled against the real
-# sources — every file under Sources/Folio except the @main entry point, which
-# would collide with the test runner's own.
+# Xcode is installed but `xcode-select` still points at the Command Line Tools,
+# which carry no XCTest. Rather than require `sudo xcode-select -s`, this sets
+# DEVELOPER_DIR for the duration of the run.
 #
-# Usage: Scripts/test.sh
+# Usage: Scripts/test.sh [extra swift test arguments]
 #
 
 set -euo pipefail
@@ -15,20 +14,23 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-BIN="$(mktemp -d)/folio-tests"
+if ! xcrun --find xctest >/dev/null 2>&1; then
+    for candidate in /Applications/Xcode*.app; do
+        if [ -d "$candidate/Contents/Developer" ]; then
+            export DEVELOPER_DIR="$candidate/Contents/Developer"
+            break
+        fi
+    done
+fi
 
-# Built with a read loop rather than mapfile: macOS ships bash 3.2.
-SOURCES=()
-while IFS= read -r file; do SOURCES+=("$file"); done \
-    < <(find Sources/Folio -name '*.swift' ! -name 'FolioApp.swift' | sort)
+if ! xcrun --find xctest >/dev/null 2>&1; then
+    echo "test: no XCTest available. Install Xcode, or point DEVELOPER_DIR at it." >&2
+    exit 1
+fi
 
-CASES=()
-while IFS= read -r file; do CASES+=("$file"); done \
-    < <(find Tests -name '*.swift' ! -name 'main.swift' | sort)
+# Outside an app bundle the renderer cannot find its own assets, and the
+# markdown-to-PDF tests need them.
+export FOLIO_WEB_ROOT="$ROOT/Web"
 
-echo "==> Compiling ${#SOURCES[@]} source files and ${#CASES[@]} test files"
-swiftc -swift-version 5 -o "$BIN" "${SOURCES[@]}" "${CASES[@]}" Tests/main.swift
-
-echo "==> Running"
-# The renderer's assets live beside the sources when not running from a bundle.
-FOLIO_WEB_ROOT="$ROOT/Web" "$BIN"
+echo "==> Using $(basename "$(dirname "$(dirname "${DEVELOPER_DIR:-$(xcode-select -p)}")")")"
+swift test "$@"
