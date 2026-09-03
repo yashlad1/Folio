@@ -61,6 +61,7 @@ func testFormatMetadata() {
 
 // MARK: - Naming and overwrite safety
 
+@MainActor
 func testOutputNaming() {
     T.suite("Output naming")
     let source = URL(fileURLWithPath: "/docs/Report Q3.md")
@@ -70,6 +71,7 @@ func testOutputNaming() {
             "only the final extension is replaced")
 }
 
+@MainActor
 func testVacantDestination() {
     T.suite("Overwrite safety")
     let free = Scratch.path("nothing-here.pdf")
@@ -164,12 +166,13 @@ func testAttributedRendering() {
 
 // MARK: - The offline guard
 
+@MainActor
 func testOfflineGuardRules() async {
     T.suite("Offline guard")
     let rules = OffscreenRenderer.blockRules
 
     let parsed = try? JSONSerialization.jsonObject(with: Data(rules.utf8)) as? [[String: Any]]
-    T.check((parsed??.count ?? 0) >= 2, "the rule list is valid JSON with a block and allow rules")
+    T.check((parsed?.count ?? 0) >= 2, "the rule list is valid JSON with a block and allow rules")
     T.check(!rules.contains("|"),
             "no alternation — WebKit's content-blocker regex rejects it, which silently disarms the guard")
     for scheme in ["folio", "file", "data", "blob", "about"] {

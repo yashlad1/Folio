@@ -28,6 +28,7 @@ func runAllTests() async {
     await testPDFRoundTrip()
     await testPDFStructureRecovery()
     await testPDFToImages()
+    await testCodeBlocksAreNotLists()
     await testRejectsUnsupported()
     await testPDFPassThrough()
 }

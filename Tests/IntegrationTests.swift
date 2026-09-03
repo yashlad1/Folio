@@ -212,6 +212,42 @@ func testPDFToImages() async {
     }
 }
 
+@MainActor
+func testCodeBlocksAreNotLists() async {
+    T.suite("Convert › code is not a list")
+    // List recovery keys off indentation, and code blocks are indented too.
+    // Monospaced lines are excluded for exactly this reason; if that exclusion
+    // regresses, every line of every code sample turns into a bullet.
+    let source = Scratch.file("code.md", """
+    # Sample
+
+    An ordinary paragraph of prose that is long enough to wrap onto a second line when it is laid out into the printed column.
+
+    ```swift
+    struct Folio {
+        let bundled = true
+    }
+    ```
+    """)
+    let pdf = Scratch.path("code.pdf")
+    let out = Scratch.path("code-recovered.md")
+    do {
+        try await Converter.convert(source, to: .pdf, at: pdf)
+        try await Converter.convert(pdf, to: .markdown, at: out)
+    } catch {
+        T.check(false, "round-trips without error", "\(error)")
+        return
+    }
+
+    let recovered = (try? String(contentsOf: out, encoding: .utf8)) ?? ""
+    let bulletedCode = recovered
+        .split(separator: "\n")
+        .filter { $0.hasPrefix("- ") && ($0.contains("struct Folio") || $0.contains("bundled")) }
+    T.check(bulletedCode.isEmpty, "code lines are not turned into bullets",
+            "got \(bulletedCode)")
+    T.contains(recovered, "struct Folio", "the code itself is still recovered")
+}
+
 // MARK: - Failure handling
 
 @MainActor
