@@ -1,0 +1,352 @@
+/* Folio — markdown reading surface. Theme is driven by [data-theme] on <html>,
+   set explicitly from Swift, so there are no prefers-color-scheme branches. */
+
+:root {
+  --fg: #1f2328;
+  --fg-muted: #59636e;
+  --fg-faint: #818b98;
+  --bg: #ffffff;
+  --bg-subtle: #f6f8fa;
+  --bg-inset: #eff2f5;
+  --border: #d1d9e0;
+  --border-soft: #e4e8ed;
+  --accent: #0969da;
+  --accent-soft: rgba(9, 105, 218, 0.10);
+  --danger: #cf222e;
+  --mark: #fff3a3;
+  --shadow: rgba(31, 35, 40, 0.09);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, Monaco, "Cascadia Mono", monospace;
+
+  --body-font: var(--font-sans);
+  --body-size: 16px;
+  --measure: 46rem;
+  --gutter-display: block;
+}
+
+html[data-theme="dark"] {
+  --fg: #e6edf3;
+  --fg-muted: #9198a1;
+  --fg-faint: #6e7681;
+  --bg: #1c2128;
+  --bg-subtle: #22272e;
+  --bg-inset: #2d333b;
+  --border: #3d444d;
+  --border-soft: #30363d;
+  --accent: #6cb6ff;
+  --accent-soft: rgba(108, 182, 255, 0.12);
+  --danger: #ff7b72;
+  --mark: #6b5a1a;
+  --shadow: rgba(0, 0, 0, 0.4);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  font-kerning: normal;
+}
+
+body { overflow-y: scroll; }
+
+::selection { background: var(--accent-soft); }
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+
+.markdown {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 44px 40px 55vh;
+  font-family: var(--body-font);
+  font-size: var(--body-size);
+  line-height: 1.68;
+  word-wrap: break-word;
+}
+
+html.wide .markdown { max-width: none; padding-left: 8%; padding-right: 8%; }
+
+/* ── Headings ───────────────────────────────────────────────────────── */
+
+.markdown h1, .markdown h2, .markdown h3,
+.markdown h4, .markdown h5, .markdown h6 {
+  margin: 1.9em 0 0.6em;
+  line-height: 1.28;
+  font-weight: 650;
+  letter-spacing: -0.011em;
+  scroll-margin-top: 24px;
+  position: relative;
+}
+
+.markdown > :first-child { margin-top: 0; }
+
+.markdown h1 { font-size: 1.95em; font-weight: 700; letter-spacing: -0.02em; }
+.markdown h2 {
+  font-size: 1.48em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-soft);
+}
+.markdown h3 { font-size: 1.22em; }
+.markdown h4 { font-size: 1.05em; }
+.markdown h5 { font-size: 0.94em; }
+.markdown h6 { font-size: 0.88em; color: var(--fg-muted); }
+
+.anchor {
+  position: absolute;
+  left: -0.85em;
+  width: 0.85em;
+  color: var(--fg-faint);
+  opacity: 0;
+  text-decoration: none;
+  font-weight: 400;
+  transition: opacity 0.12s ease;
+}
+h1:hover .anchor, h2:hover .anchor, h3:hover .anchor,
+h4:hover .anchor, h5:hover .anchor, h6:hover .anchor { opacity: 1; }
+
+/* ── Text ───────────────────────────────────────────────────────────── */
+
+.markdown p, .markdown ul, .markdown ol, .markdown dl { margin: 0 0 1.05em; }
+.markdown ul, .markdown ol { padding-left: 1.7em; }
+.markdown li { margin: 0.28em 0; }
+.markdown li > ul, .markdown li > ol { margin: 0.28em 0; }
+
+.markdown a { color: var(--accent); text-decoration: none; }
+.markdown a:hover { text-decoration: underline; }
+.markdown a.wiki { border-bottom: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
+.markdown a.broken { color: var(--danger); }
+
+.markdown strong { font-weight: 650; }
+.markdown mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 2px; }
+
+.markdown hr {
+  height: 1px;
+  border: 0;
+  background: var(--border-soft);
+  margin: 2.2em 0;
+}
+
+.markdown blockquote {
+  margin: 0 0 1.05em;
+  padding: 0.15em 0 0.15em 1.1em;
+  border-left: 3px solid var(--border);
+  color: var(--fg-muted);
+}
+.markdown blockquote > :last-child { margin-bottom: 0; }
+
+.markdown img { max-width: 100%; height: auto; border-radius: 6px; }
+.markdown img.missing {
+  outline: 1px dashed var(--danger);
+  padding: 1em;
+  min-width: 8em;
+}
+
+.markdown kbd {
+  font: 0.82em var(--font-mono);
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--bg-subtle);
+}
+
+/* ── Task lists ─────────────────────────────────────────────────────── */
+
+.markdown li.task-list-item { list-style: none; margin-left: -1.35em; }
+.markdown li.task-list-item input { margin: 0 0.5em 0 0; vertical-align: -0.05em; }
+.markdown li.task-list-item.done { color: var(--fg-muted); }
+
+/* ── Tables ─────────────────────────────────────────────────────────── */
+
+.table-scroll { overflow-x: auto; margin: 0 0 1.2em; }
+
+.markdown table {
+  border-collapse: collapse;
+  font-size: 0.93em;
+  width: max-content;
+  min-width: 100%;
+}
+.markdown th, .markdown td {
+  border: 1px solid var(--border-soft);
+  padding: 0.42em 0.75em;
+  text-align: left;
+  vertical-align: top;
+}
+.markdown th { background: var(--bg-subtle); font-weight: 620; }
+.markdown tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--bg-subtle) 55%, transparent); }
+
+/* ── Code ───────────────────────────────────────────────────────────── */
+
+.markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--bg-inset);
+  padding: 0.16em 0.36em;
+  border-radius: 4px;
+}
+
+.codeblock {
+  margin: 0 0 1.25em;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+
+.cb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  font: 500 11px var(--font-sans);
+  color: var(--fg-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.cb-copy {
+  font: 500 11px var(--font-sans);
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.cb-copy:hover { color: var(--fg); background: var(--bg-inset); }
+.cb-copy.ok { color: #1a7f37; border-color: #1a7f37; }
+
+.codeblock pre {
+  display: flex;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.875em;
+  line-height: 1.55;
+}
+
+.codeblock .gutter {
+  display: var(--gutter-display);
+  flex: none;
+  padding: 12px 10px 12px 12px;
+  font-family: var(--font-mono);
+  text-align: right;
+  color: var(--fg-faint);
+  background: color-mix(in srgb, var(--bg-inset) 60%, transparent);
+  border-right: 1px solid var(--border-soft);
+  user-select: none;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.codeblock pre > code {
+  flex: 1 1 auto;
+  overflow-x: auto;
+  padding: 12px 14px;
+  background: transparent;
+  border-radius: 0;
+  font-size: 1em;
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* ── Callouts (> [!NOTE] and friends) ───────────────────────────────── */
+
+.callout {
+  margin: 0 0 1.2em;
+  border: 1px solid var(--co);
+  border-left-width: 3px;
+  border-radius: 7px;
+  padding: 0.75em 1em;
+  background: color-mix(in srgb, var(--co) 7%, transparent);
+}
+.callout-title {
+  display: flex;
+  gap: 0.45em;
+  align-items: center;
+  font-weight: 640;
+  color: var(--co);
+  margin-bottom: 0.35em;
+}
+.callout > :last-child { margin-bottom: 0; }
+.callout[data-kind="note"]      { --co: #0969da; }
+.callout[data-kind="tip"]       { --co: #1a7f37; }
+.callout[data-kind="important"] { --co: #8250df; }
+.callout[data-kind="warning"]   { --co: #9a6700; }
+.callout[data-kind="caution"]   { --co: #cf222e; }
+html[data-theme="dark"] .callout[data-kind="note"]      { --co: #6cb6ff; }
+html[data-theme="dark"] .callout[data-kind="tip"]       { --co: #57ab5a; }
+html[data-theme="dark"] .callout[data-kind="important"] { --co: #b083f0; }
+html[data-theme="dark"] .callout[data-kind="warning"]   { --co: #daaa3f; }
+html[data-theme="dark"] .callout[data-kind="caution"]   { --co: #ff7b72; }
+
+/* ── Frontmatter ────────────────────────────────────────────────────── */
+
+.frontmatter {
+  margin: 0 0 2em;
+  padding: 0.9em 1.1em;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  font-size: 0.88em;
+}
+.frontmatter dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.3em 1.1em;
+  margin: 0;
+}
+.frontmatter dt { color: var(--fg-muted); font-weight: 560; }
+.frontmatter dd { margin: 0; }
+.frontmatter .tag {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 20px;
+  padding: 0 0.6em;
+  margin-right: 0.3em;
+  font-size: 0.92em;
+}
+
+/* ── Math and diagrams ──────────────────────────────────────────────── */
+
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.35em 0; }
+.math-error { color: var(--danger); font-family: var(--font-mono); font-size: 0.85em; }
+
+.mermaid-wrap {
+  margin: 0 0 1.3em;
+  padding: 0.9em;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  overflow-x: auto;
+  text-align: center;
+}
+.mermaid-wrap svg { max-width: 100%; height: auto; }
+
+/* ── Footnotes ──────────────────────────────────────────────────────── */
+
+.footnotes {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border-soft);
+  font-size: 0.9em;
+  color: var(--fg-muted);
+}
+.footnotes ol { padding-left: 1.4em; }
+.fn-ref { font-size: 0.78em; vertical-align: super; text-decoration: none; }
+
+/* ── Export / print ─────────────────────────────────────────────────── */
+
+html.exporting { --measure: none; }
+html.exporting .markdown { max-width: none; padding: 0 0 1em; }
+html.exporting .cb-copy,
+html.exporting .anchor { display: none; }
+html.exporting .codeblock,
+html.exporting .markdown pre > code { break-inside: avoid; }
+html.exporting h1, html.exporting h2, html.exporting h3 { break-after: avoid; }

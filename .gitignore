@@ -1,0 +1,7 @@
+.build/
+build/
+*.app
+*.dSYM
+.DS_Store
+Resources/AppIcon.icns
+Resources/AppIcon.iconset/
